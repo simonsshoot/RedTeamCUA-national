@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # Reddit Forum from WebArena - Commented out until image is available
+  # reddit:
+  #   image: postmill-populated-exposed-withimg
+  #   container_name: forum
+  #   ports:
+  #     - "9999:80"
+  #   restart: unless-stopped
+  #   networks:
+  #     - redteamcua-network
+
+  # OwnCloud from TheAgentCompany
+  owncloud:
+    image: owncloud/server:10.13
+    container_name: owncloud
+    ports:
+      - "8092:8080"
+    environment:
+      - OWNCLOUD_DOMAIN=localhost:8092
+      - OWNCLOUD_TRUSTED_DOMAINS=localhost,127.0.0.1,the-agent-company.com,192.168.229.1,192.168.28.183,*
+      - OWNCLOUD_DB_TYPE=sqlite
+      - OWNCLOUD_ADMIN_USERNAME=theagentcompany
+      - OWNCLOUD_ADMIN_PASSWORD=theagentcompany
+      - OWNCLOUD_SKIP_CHOWN=true
+    volumes:
+      - owncloud_data:/mnt/data
+    restart: unless-stopped
+    networks:
+      - redteamcua-network
+
+  # RocketChat from TheAgentCompany
+  rocketchat:
+    image: rocket.chat:6.4
+    container_name: rocketchat
+    ports:
+      - "3000:3000"
+    environment:
+      - ROOT_URL=http://localhost:3000
+      - MONGO_URL=mongodb://mongo:27017/rocketchat
+      - MONGO_OPLOG_URL=mongodb://mongo:27017/local
+      - Accounts_UseDNSDomainCheck=false
+    depends_on:
+      - mongo
+    volumes:
+      - rocketchat_data:/app/uploads
+    restart: unless-stopped
+    networks:
+      - redteamcua-network
+
+  # MongoDB for RocketChat
+  mongo:
+    image: mongo:4.4
+    container_name: mongo
+    volumes:
+      - mongo_data:/data/db
+    command: mongod --oplogSize 128 --replSet rs0
+    restart: unless-stopped
+    networks:
+      - redteamcua-network
+
+  # MongoDB replica set initialization
+  mongo-init-replica:
+    image: mongo:4.4
+    container_name: mongo-init-replica
+    command: >
+      bash -c "
+        until mongo mongo:27017/test --quiet --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'; do
+          echo '==> Waiting for MongoDB...'
+          sleep 1
+        done
+        echo '==> Initializing replica set...'
+        mongo mongo:27017/test --eval 'rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo:27017\" }]})'
+        echo '==> Replica set initialized.'
+      "
+    depends_on:
+      - mongo
+    networks:
+      - redteamcua-network
+    restart: "no"
+
+  # 新增：统一的网络代理服务
+  network-proxy:
+    image: nginx:alpine
+    container_name: redteamcua-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./proxy-config:/etc/nginx/conf.d
+    depends_on:
+      - owncloud
+      - rocketchat
+    networks:
+      - redteamcua-network
+
+  # 新增：实验监控服务
+  monitoring:
+    image: grafana/grafana:latest
+    container_name: redteamcua-monitor
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=redteamcua
+    volumes:
+      - monitoring_data:/var/lib/grafana
+    networks:
+      - redteamcua-network
+
+  # 新增：日志聚合服务
+  logging:
+    image: elasticsearch:7.14.0
+    container_name: redteamcua-logs
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - logs_data:/usr/share/elasticsearch/data
+    networks:
+      - redteamcua-network
+
+volumes:
+  owncloud_data:
+  rocketchat_data:
+  mongo_data:
+  monitoring_data:
+  logs_data:
+
+networks:
+  redteamcua-network:
+    driver: bridge

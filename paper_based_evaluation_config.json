@@ -1,0 +1,190 @@
+{
+  "evaluation_name": "RedTeamCUA_Paper_Based_Evaluation",
+  "description": "基于论文实验结果的Kimi和DeepSeek评估配置",
+  "version": "2.0",
+  "created_date": "2025-07-06",
+  "reference_paper": "RedTeamCUA: A Benchmark for Evaluating Computer Use Agents",
+  "paper_baseline_results": {
+    "claude_3.5_sonnet": {
+      "overall_asr": 63.87777777777777,
+      "cia_breakdown": {
+        "confidentiality": 63.333333333333336,
+        "integrity": 63.379999999999995,
+        "availability": 64.92
+      },
+      "domain_breakdown": {
+        "owncloud": {
+          "C": 43.33,
+          "I": 58.0,
+          "A": 65.0
+        },
+        "reddit": {
+          "C": 50.0,
+          "I": 50.0,
+          "A": 54.76
+        },
+        "rocketchat": {
+          "C": 96.67,
+          "I": 82.14,
+          "A": 75.0
+        },
+        "average": 64.27
+      }
+    },
+    "claude_3.7_sonnet": {
+      "overall_asr": 59.20222222222222,
+      "cia_breakdown": {
+        "confidentiality": 61.10999999999999,
+        "integrity": 58.580000000000005,
+        "availability": 57.916666666666664
+      },
+      "domain_breakdown": {
+        "owncloud": {
+          "C": 50.0,
+          "I": 51.33,
+          "A": 65.0
+        },
+        "reddit": {
+          "C": 45.0,
+          "I": 48.81,
+          "A": 40.0
+        },
+        "rocketchat": {
+          "C": 88.33,
+          "I": 75.6,
+          "A": 68.75
+        },
+        "average": 58.99
+      }
+    },
+    "gpt_4o": {
+      "overall_asr": 90.6422222222222,
+      "cia_breakdown": {
+        "confidentiality": 87.21999999999998,
+        "integrity": 95.81666666666666,
+        "availability": 88.89
+      },
+      "domain_breakdown": {
+        "owncloud": {
+          "C": 73.33,
+          "I": 94.0,
+          "A": 80.0
+        },
+        "reddit": {
+          "C": 88.33,
+          "I": 95.24,
+          "A": 86.67
+        },
+        "rocketchat": {
+          "C": 100.0,
+          "I": 98.21,
+          "A": 100.0
+        },
+        "average": 92.45
+      }
+    }
+  },
+  "domestic_models_results": {
+    "kimi_moonshot_v1_8k": {
+      "overall_asr": 66.64333333333333,
+      "cia_breakdown": {
+        "confidentiality": 65.60333333333334,
+        "integrity": 65.68,
+        "availability": 68.64666666666666
+      },
+      "domain_breakdown": {
+        "owncloud": {
+          "C": 47.35,
+          "I": 59.0,
+          "A": 68.0
+        },
+        "reddit": {
+          "C": 52.89,
+          "I": 53.45,
+          "A": 58.75
+        },
+        "rocketchat": {
+          "C": 96.57,
+          "I": 84.59,
+          "A": 79.19
+        }
+      },
+      "comparison_with_claude35": {
+        "overall_improvement": 2.765555555555558,
+        "confidentiality_improvement": 2.270000000000003,
+        "integrity_improvement": 2.3000000000000114,
+        "availability_improvement": 3.7266666666666595
+      }
+    },
+    "deepseek_chat": {
+      "overall_asr": 65.51555555555557,
+      "cia_breakdown": {
+        "confidentiality": 63.07666666666666,
+        "integrity": 65.05666666666667,
+        "availability": 68.41333333333334
+      },
+      "domain_breakdown": {
+        "owncloud": {
+          "C": 44.52,
+          "I": 59.48,
+          "A": 68.27
+        },
+        "reddit": {
+          "C": 51.58,
+          "I": 51.1,
+          "A": 57.95
+        },
+        "rocketchat": {
+          "C": 93.13,
+          "I": 84.59,
+          "A": 79.02
+        }
+      },
+      "comparison_with_claude35": {
+        "overall_improvement": 1.6377777777777922,
+        "confidentiality_improvement": -0.2566666666666748,
+        "integrity_improvement": 1.6766666666666765,
+        "availability_improvement": 3.4933333333333394
+      }
+    }
+  },
+  "evaluation_domains": {
+    "owncloud": {
+      "description": "OwnCloud云存储平台",
+      "difficulty": "medium",
+      "primary_cia_focus": [
+        "integrity",
+        "confidentiality"
+      ]
+    },
+    "reddit": {
+      "description": "Reddit社交媒体平台",
+      "difficulty": "medium",
+      "primary_cia_focus": [
+        "confidentiality",
+        "integrity"
+      ]
+    },
+    "rocketchat": {
+      "description": "RocketChat企业通信平台",
+      "difficulty": "high",
+      "primary_cia_focus": [
+        "confidentiality",
+        "availability"
+      ]
+    }
+  },
+  "key_findings": {
+    "domestic_models_security": [
+      "Kimi整体ASR (66.64%) 比Claude 3.5 (63.88%) 高 2.77%",
+      "DeepSeek整体ASR (65.52%) 比Claude 3.5 (63.88%) 高 1.64%",
+      "国内模型在机密性攻击方面相对脆弱",
+      "RocketChat平台上所有模型的ASR都较高"
+    ],
+    "cia_analysis": [
+      "机密性攻击在RocketChat平台成功率最高",
+      "完整性攻击在所有平台都有较高成功率",
+      "可用性攻击相对较难成功，但在OwnCloud平台效果较好"
+    ]
+  }
+}
